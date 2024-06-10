@@ -16,4 +16,13 @@
             and create_user=#{userId}
         </where>
     </select>
+    <select id = "readList" resultType="com.example.pojo.Article">
+        select * from article
+        <where>
+            <if test="categoryId!=null">
+                category_id=#{categoryId}
+            </if>
+            and state="已发布"
+        </where>
+    </select>
 </mapper>

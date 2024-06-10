@@ -42,6 +42,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void update(Category category) {
+        category.setUpdateTime(LocalDateTime.now());
         categoryMapper.update(category);
     }
 

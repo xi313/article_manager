@@ -56,11 +56,26 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public void update(Article article) {
+        article.setUpdateTime(LocalDateTime.now());
         articleMapper.update(article);
     }
 
     @Override
     public void delete(Integer id) {
         articleMapper.delete(id);
+    }
+
+    @Override
+    public PageBean<Article> readList(Integer pageNum, Integer pageSize, Integer categoryId) {
+        //创建PageBean、
+        PageBean<Article> pb = new PageBean<>();
+        //开启分页查询PageHelper
+        PageHelper.startPage(pageNum,pageSize);
+        List<Article> as = articleMapper.readList(categoryId);
+        //Page可以获取PageHelper分页查询后得到的总记录条数和当前数据
+        Page<Article> p = (Page<Article>) as;
+        pb.setTotal(p.getTotal());
+        pb.setItems(p.getResult());
+        return pb;
     }
 }

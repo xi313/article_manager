@@ -61,4 +61,13 @@ public class ArticleController {
         articleService.delete(id);
         return Result.success();
     }
+
+    @GetMapping("/read")
+    public Result findArticleOnlyRead(
+            Integer pageNum,
+            Integer pageSize,
+            @RequestParam(required = false) Integer categoryId){
+        PageBean<Article> pb = articleService.readList(pageNum,pageSize,categoryId);
+        return Result.success(pb);
+    }
 }

@@ -14,4 +14,6 @@ public interface ArticleService {
     void update(Article article);
     //删除文章
     void delete(Integer id);
+    //分页查询发布的文章
+    PageBean<Article> readList(Integer pageNum, Integer pageSize, Integer categoryId);
 }

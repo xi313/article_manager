@@ -12,7 +12,7 @@ public interface ArticleMapper {
             " values(#{title},#{content},#{state},#{categoryId},#{createUser},#{createTime},#{updateTime})")
     void add(Article article);
 
-    //分页查询
+    //分页查询（userID下的文章）
     List<Article> list(Integer categoryId, String state, Integer userId);
 
     //根据id查找
@@ -26,4 +26,7 @@ public interface ArticleMapper {
     //删除
     @Delete("delete from article where id=#{id}")
     void delete(Integer id);
+
+    //分页查询已发布文章（共享）
+    List<Article> readList(Integer categoryId);
 }
