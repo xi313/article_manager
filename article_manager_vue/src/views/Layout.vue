@@ -7,7 +7,8 @@ import {
     Crop,
     EditPen,
     SwitchButton,
-    CaretBottom
+    CaretBottom,
+    Reading
 } from '@element-plus/icons-vue'
 import avatar from '@/assets/default.png'
 
@@ -85,6 +86,10 @@ const handleCommand = (command) => {
                         <Promotion />
                     </el-icon>
                     <span>文章管理</span>
+                </el-menu-item>
+                <el-menu-item index="/article/read">
+                    <el-icon><Reading /></el-icon>
+                    <span>文章阅读</span>
                 </el-menu-item>
                 <el-sub-menu >
                     <template #title>

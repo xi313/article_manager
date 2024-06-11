@@ -60,6 +60,12 @@ public class CategoryController {
         return Result.success(cs);
     }
 
+    @GetMapping("/all")
+    public Result<List<Category>> listAll(){
+        List<Category> cs = categoryService.listAll();
+        return Result.success(cs);
+    }
+
     @GetMapping("/detail")
     public Result detail(Integer id){
         Category c = categoryService.findById(id);

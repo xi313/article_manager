@@ -8,7 +8,7 @@ import java.util.List;
 public interface CategoryService {
     //新增文章分类
     void add(Category category);
-    //列表查询
+    //列表查询已登录用户创建的分类
     List<Category> list();
     //根据id查询
     Category findById(Integer id);
@@ -18,4 +18,6 @@ public interface CategoryService {
     void update(Category category);
     //删除分类
     void delete(Integer id);
+    //列表查询所有分类
+    List<Category> listAll();
 }

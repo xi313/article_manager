@@ -50,4 +50,9 @@ public class CategoryServiceImpl implements CategoryService {
     public void delete(Integer id) {
         categoryMapper.delete(id);
     }
+
+    @Override
+    public List<Category> listAll() {
+        return categoryMapper.list(null);
+    }
 }
