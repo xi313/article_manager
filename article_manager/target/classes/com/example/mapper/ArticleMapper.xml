@@ -8,21 +8,26 @@
         select * from article
         <where>
             <if test="categoryId!=null">
-                category_id=#{categoryId}
+                category_id in
+                <foreach item="id" index="index" collection="categoryId" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
             </if>
             <if test="state!=null">
                 and state=#{state}
             </if>
-            and create_user=#{userId}
-        </where>
-    </select>
-    <select id = "readList" resultType="com.example.pojo.Article">
-        select * from article
-        <where>
-            <if test="categoryId!=null">
-                category_id=#{categoryId}
+            <if test="userId!=null">
+                and create_user=#{userId}
             </if>
-            and state="已发布"
+            <if test="date!=null">
+                and to_days(update_time)=to_days(#{date})
+            </if>
+            <if test="titleKeyword!=null and titleKeyword!=''">
+                and title like "%"#{titleKeyword}"%"
+            </if>
+            <if test="contentKeyword!=null and contentKeyword!='' ">
+                and content like "%"#{contentKeyword}"%"
+            </if>
         </where>
     </select>
 </mapper>

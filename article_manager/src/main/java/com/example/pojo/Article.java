@@ -16,7 +16,7 @@ public class Article {
     private Integer id;//主键ID
 
     @NotEmpty
-    @Pattern(regexp = "^\\S{1,10}$")
+    @Pattern(regexp = "^\\S{1,20}$")
     private String title;//文章标题
 
     @NotEmpty

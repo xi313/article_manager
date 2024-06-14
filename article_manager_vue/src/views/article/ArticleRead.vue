@@ -1,5 +1,5 @@
 <script setup>
-import { Reading,Edit, Delete } from "@element-plus/icons-vue";
+import { Reading, Edit, Delete } from "@element-plus/icons-vue";
 
 import { ref, shallowRef } from "vue";
 
@@ -10,7 +10,7 @@ const categorys_firstname = ref([]);
 const categorys_secondname = ref([]);
 const categorys_thirdname = ref([]);
 //用户搜索时选中的分类id
-const categoryId = ref("");
+const categoryId = ref([]);
 //分类名
 const category_first = ref("");
 const category_second = ref("");
@@ -21,7 +21,11 @@ const category_second_add = ref("");
 const category_third_add = ref("");
 //用户搜索时选中的发布状态
 const state = ref("");
-
+//日期
+const date = ref("");
+//用户搜索时的关键字
+const titleKeyword = ref("");
+const contentKeyword = ref("");
 //文章列表数据模型
 const articles = ref([]);
 //评论列表数据模型
@@ -97,6 +101,7 @@ const articleCategoryList = async () => {
   }));
 };
 const findCategoryID = () => {
+  categoryId.value = [];
   for (let i = 0; i < categorys.value.length; i++) {
     let category = categorys.value[i];
     if (
@@ -104,21 +109,7 @@ const findCategoryID = () => {
       category_second.value == category.secondCategoryName &&
       category_third.value == category.thirdCategoryName
     ) {
-      categoryId.value = category.id;
-      break;
-    }
-  }
-};
-const findCategoryIDAdd = () => {
-  for (let i = 0; i < categorys.value.length; i++) {
-    let category = categorys.value[i];
-    if (
-      category_first_add.value == category.firstCategoryName &&
-      category_second_add.value == category.secondCategoryName &&
-      category_third_add.value == category.thirdCategoryName
-    ) {
-      categoryId.value = category.id;
-      break;
+      categoryId.value.push(category.id);
     }
   }
 };
@@ -127,7 +118,10 @@ const articleList = async () => {
   let params = {
     pageNum: pageNum_article.value,
     pageSize: pageSize_article.value,
-    categoryId: categoryId.value ? categoryId.value : null,
+    categoryId: categoryId.value.length != 0 ? categoryId.value : null,
+    date: date.value ? date.value : null,
+    titleKeyword: titleKeyword.value ? titleKeyword.value : null,
+    contentKeyword: contentKeyword.value ? contentKeyword.value : null,
   };
   let result = await articleReadService(params);
   //渲染视图
@@ -149,9 +143,7 @@ const articleList = async () => {
 articleCategoryList();
 articleList();
 
-import { QuillEditor } from "@vueup/vue-quill";
 import wangEditor from "@/editor/wangEditor.vue";
-import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import "@wangeditor/editor/dist/css/style.css"; // 引入 css
 
 import { onBeforeUnmount, onMounted } from "vue";
@@ -203,20 +195,23 @@ const clearData = () => {
   articleModel.value.title = "";
   articleModel.value.content = "";
 };
-const clearCategory = () => {
+const clearSearch = () => {
+  categoryId.value = [];
+  state.value = "";
   category_first.value = "";
   category_second.value = "";
   category_third.value = "";
-  categoryId.value = "";
-};
-const clearCategoryAdd = () => {
-  category_first_add.value = "";
-  category_second_add.value = "";
-  category_third_add.value = "";
-  categoryId.value = "";
+  date.value = "";
+  titleKeyword.value = "";
+  contentKeyword.value = "";
 };
 
-import { commentListService, commentAddService,commentDeleteService } from "@/api/comment.js";
+import {
+  commentListService,
+  commentListSelfService,
+  commentAddService,
+  commentDeleteService,
+} from "@/api/comment.js";
 
 const addComment = async () => {
   if (comment.value.content == "") {
@@ -230,18 +225,14 @@ const addComment = async () => {
   }
 };
 const deleteComment = (row) => {
-  ElMessageBox.confirm(
-    "确认删除该分类吗",
-    "温馨提示",
-    {
-      confirmButtonText: "确认",
-      cancelButtonText: "取消",
-      type: "warning",
-    }
-  )
+  ElMessageBox.confirm("确认删除该分类吗", "温馨提示", {
+    confirmButtonText: "确认",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
     .then(async () => {
-        //调用接口
-        let result = await commentDeleteService(row.id);
+      //调用接口
+      let result = await commentDeleteService(row.id);
       ElMessage({
         type: "success",
         message: "删除成功",
@@ -256,7 +247,6 @@ const deleteComment = (row) => {
       });
     });
 };
-const updateComment = () => {};
 const commentList = async () => {
   let params = {
     pageNum: pageNum_comment.value,
@@ -268,7 +258,17 @@ const commentList = async () => {
   total_comment.value = result.data.total;
   comments.value = result.data.items;
 };
-
+const commentListSelf = async () => {
+  let params = {
+    pageNum: pageNum_comment.value,
+    pageSize: pageSize_comment.value,
+    articleId: articleModel.value.id,
+  };
+  let result = await commentListSelfService(params);
+  //渲染视图
+  total_comment.value = result.data.total;
+  comments.value = result.data.items;
+};
 import { useUserInfoStore } from "@/stores/userInfo.js";
 const userInfoStore = useUserInfoStore();
 const userInfo = ref({ ...userInfoStore.info });
@@ -336,6 +336,29 @@ const userInfo = ref({ ...userInfoStore.info });
           </el-option>
         </el-select>
       </el-form-item>
+      <el-form-item label="日期：">
+        <el-date-picker
+          v-model="date"
+          type="date"
+          placeholder="选择发布日期"
+          :size="size"
+          value-format="YYYY-MM-DD"
+        />
+      </el-form-item>
+      <el-form-item label="标题关键词：">
+        <el-input
+          v-model="titleKeyword"
+          placeholder="请输入"
+          clearable
+        />
+      </el-form-item>
+      <el-form-item label="内容关键词：">
+        <el-input
+          v-model="contentKeyword"
+          placeholder="请输入"
+          clearable
+        />
+      </el-form-item>
       <el-form-item>
         <el-button
           type="primary"
@@ -345,17 +368,7 @@ const userInfo = ref({ ...userInfoStore.info });
           "
           >搜索</el-button
         >
-        <el-button
-          @click="
-            categoryId = '';
-            state = '';
-            category_first = '';
-            category_second = '';
-            category_third = '';
-            articleList();
-          "
-          >重置</el-button
-        >
+        <el-button @click="clearSearch();articleList()">重置</el-button>
       </el-form-item>
     </el-form>
     <!-- 文章列表 -->
@@ -408,78 +421,82 @@ const userInfo = ref({ ...userInfoStore.info });
       @current-change="onCurrentChange_article"
       style="margin-top: 20px; justify-content: flex-end"
     />
-
     <!-- 抽屉 -->
     <el-drawer
       v-model="visibleDrawer"
       :title="articleModel.title"
       direction="rtl"
-      size="70%"
+      size="80%"
     >
-      <!-- 阅读文章表单 -->
-      <el-form :model="articleModel" label-width="100px">
-        <el-form-item>
-          <div class="editor">
-            <Editor
-              style="height: 200px; overflow-y: hidden"
-              v-model="articleModel.content"
-              :defaultConfig="editorConfig"
-              :mode="mode"
-              @onCreated="handleCreated"
-            />
-          </div>
-        </el-form-item>
-        <el-table :data="comments" style="width: 100%">
-          <el-table-column
-            label="评论"
-            width="500"
-            prop="content"
-          ></el-table-column>
-          <el-table-column label="发表时间" prop="createTime">
-          </el-table-column>
-          <el-table-column label="操作" width="100">
-            <template #default="{ row }">
-              <el-button
-                :icon="Delete"
-                circle
-                plain
-                :disabled="row.createUser != userInfo.id"
-                type="danger"
-                @click="deleteComment(row)"
-              ></el-button>
-            </template>
-          </el-table-column>
-          <template #empty>
-            <el-empty description="没有数据" />
-          </template>
-        </el-table>
-        <el-pagination
-          v-model:current-page="pageNum_comment"
-          v-model:page-size="pageSize_comment"
-          :page-sizes="pageSizes_comment"
-          layout="jumper, total, sizes, prev, pager, next"
-          background
-          small
-          :total="total_comment"
-          @size-change="onSizeChange_comment"
-          @current-change="onCurrentChange_comment"
-          style="margin-top: 20px; justify-content: flex-start"
+      <template #header="{ titleId, titleClass }">
+        <h1 :id="titleId" :class="titleClass">{{ articleModel.title }}</h1>
+      </template>
+      <Editor
+        style="height: 50%; overflow-y: hidden"
+        v-model="articleModel.content"
+        :defaultConfig="editorConfig"
+        :mode="mode"
+        @onCreated="handleCreated"
+      />
+      <div class="extra">
+        <el-input
+          v-model="comment.content"
+          placeholder="请输入评论"
+          clearable
+          style="width: 50%; margin-top: 20px; justify-content: flex-start"
         />
-        <el-form-item style="justify-content: flex-start">
-          <el-input
-            v-model="comment.content"
-            style="margin-top: 20px; width: 70%"
-            placeholder="请输入评论"
-            clearable
-          />
-          <el-button
-            style="margin-top: 20px"
-            type="primary"
-            @click="addComment()"
-            >评论</el-button
-          >
-        </el-form-item>
-      </el-form>
+        <el-button
+          style="margin-top: 20px; justify-content: flex-end"
+          type="primary"
+          @click="addComment()"
+          >评论</el-button
+        >
+        <el-button
+          style="margin-top: 20px; justify-content: flex-end"
+          @click="commentListSelf()"
+          >我的评论</el-button
+        >
+        <el-button
+          style="margin-top: 20px; justify-content: flex-end"
+          @click="commentList()"
+          >所有评论</el-button
+        >
+      </div>
+      <el-table :data="comments" style="width: 100%; height: 30%">
+        <el-table-column
+          label="评论"
+          width="500"
+          prop="content"
+        ></el-table-column>
+        <el-table-column label="发表时间" prop="createTime"> </el-table-column>
+        <el-table-column label="操作" width="100">
+          <template #default="{ row }">
+            <el-button
+              :icon="Delete"
+              circle
+              plain
+              :disabled="row.createUser != userInfo.id"
+              type="danger"
+              @click="deleteComment(row)"
+            ></el-button>
+          </template>
+        </el-table-column>
+        <template #empty>
+          <el-empty description="暂无评论" />
+        </template>
+      </el-table>
+      <el-pagination
+        v-model:current-page="pageNum_comment"
+        v-model:page-size="pageSize_comment"
+        :page-sizes="pageSizes_comment"
+        layout="jumper, total, sizes, prev, pager, next"
+        background
+        small
+        :total="total_comment"
+        @size-change="onSizeChange_comment"
+        @current-change="onCurrentChange_comment"
+        style="margin-top: 20px; justify-content: flex-start"
+      />
     </el-drawer>
   </el-card>
 </template>

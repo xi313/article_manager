@@ -43,5 +43,5 @@ export const articleUpdateService = (articleData)=>{
 }
 //文章阅读
 export const articleReadService = (params)=>{
-    return request.get('/article/read',{params:params})
+    return request.post('/article/read',params)
 }

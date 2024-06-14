@@ -7,7 +7,8 @@ public interface ArticleService {
     //新增文章
     void add(Article article);
     //条件分页列表查询
-    PageBean<Article> list(Integer pageNum, Integer pageSize, Integer categoryId, String state);
+    PageBean<Article> list(Integer pageNum, Integer pageSize, Integer[] categoryId, String state,
+                           String date,String titleKeyword,String contentKeyword);
     //根据id查找
     Article findArticleById(Integer id);
     //更新文章
@@ -15,5 +16,6 @@ public interface ArticleService {
     //删除文章
     void delete(Integer id);
     //分页查询发布的文章
-    PageBean<Article> readList(Integer pageNum, Integer pageSize, Integer categoryId);
+    PageBean<Article> readList(Integer pageNum, Integer pageSize, Integer[] categoryId,
+                               String date,String titleKeyword,String contentKeyword);
 }

@@ -33,7 +33,8 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public PageBean<Article> list(Integer pageNum, Integer pageSize, Integer categoryId, String state) {
+    public PageBean<Article> list(Integer pageNum, Integer pageSize, Integer[] categoryId, String state,
+                                  String date,String titleKeyword,String contentKeyword) {
         //创建PageBean、
         PageBean<Article> pb = new PageBean<>();
         //开启分页查询PageHelper
@@ -41,7 +42,7 @@ public class ArticleServiceImpl implements ArticleService {
         //调用mapper
         Map<String,Object> map = ThreadLocalUtil.get();
         Integer userId = (Integer) map.get("id");
-        List<Article> as = articleMapper.list(categoryId,state,userId);
+        List<Article> as = articleMapper.list(categoryId,state,userId,date,titleKeyword,contentKeyword);
         //Page可以获取PageHelper分页查询后得到的总记录条数和当前数据
         Page<Article> p = (Page<Article>) as;
         pb.setTotal(p.getTotal());
@@ -66,12 +67,14 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public PageBean<Article> readList(Integer pageNum, Integer pageSize, Integer categoryId) {
+    public PageBean<Article> readList(Integer pageNum, Integer pageSize, Integer[] categoryId,
+                                      String date,String titleKeyword,String contentKeyword) {
         //创建PageBean、
         PageBean<Article> pb = new PageBean<>();
         //开启分页查询PageHelper
         PageHelper.startPage(pageNum,pageSize);
-        List<Article> as = articleMapper.readList(categoryId);
+        List<Article> as = articleMapper.list(categoryId,"已发布",null,date,titleKeyword,contentKeyword);
+                //articleMapper.readList(categoryId,date);
         //Page可以获取PageHelper分页查询后得到的总记录条数和当前数据
         Page<Article> p = (Page<Article>) as;
         pb.setTotal(p.getTotal());

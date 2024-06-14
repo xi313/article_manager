@@ -5,6 +5,10 @@ import { useTokenStore } from "@/stores/token";
 export const commentListService = (params)=>{
     return request.get('/comment',{params:params})
 }
+//查看自己的评论
+export const commentListSelfService = (params)=>{
+    return request.get('/comment/self',{params:params})
+}
 //添加评论
 export const commentAddService = (commentData)=>{
     return request.post('/comment',commentData)

@@ -10,6 +10,11 @@ const categorys_secondname = ref([]);
 const categorys_thirdname = ref([]);
 //用户搜索时选中的分类id
 const categoryId = ref("");
+//日期
+const date = ref("");
+//用户搜索时的关键字
+const titleKeyword = ref("");
+const contentKeyword = ref("");
 //分类名
 const category_first = ref("");
 const category_second = ref("");
@@ -46,7 +51,7 @@ import {
   articleListService,
   articleAddService,
   articleDeleteService,
-  articleUpdateService
+  articleUpdateService,
 } from "@/api/article.js";
 const articleCategoryList = async () => {
   let result = await articleCategoryListService();
@@ -56,49 +61,53 @@ const articleCategoryList = async () => {
   const third = {};
   for (let i = 0; i < result.data.length; i++) {
     let category = result.data[i];
-    if(!first[category.firstCategoryName]){
-      first[category.firstCategoryName] ={};
+    if (!first[category.firstCategoryName]) {
+      first[category.firstCategoryName] = {};
     }
-    if(!second[category.secondCategoryName]){
+    if (!second[category.secondCategoryName]) {
       second[category.secondCategoryName] = {
         firstCategoryName: category.firstCategoryName,
       };
     }
-    if(!third[category.thirdCategoryName]){
+    if (!third[category.thirdCategoryName]) {
       third[category.thirdCategoryName] = {
         secondCategoryName: category.secondCategoryName,
       };
     }
   }
-  categorys_firstname.value = Object.keys(first).map(firstname => ({  
-    firstCategoryName: firstname, // 使用 firstname 作为 value（如果需要）  
-  }));  
-  categorys_secondname.value = Object.keys(second).map(secondname => ({  
-    firstCategoryName:second[secondname].firstCategoryName,
-    secondCategoryName: secondname, // 使用 firstname 作为 value（如果需要）  
-  })); 
-  categorys_thirdname.value = Object.keys(third).map(thirdname => ({  
-    secondCategoryName:third[thirdname].secondCategoryName,
-    thirdCategoryName: thirdname, // 使用 firstname 作为 value（如果需要）  
-  })); 
+  categorys_firstname.value = Object.keys(first).map((firstname) => ({
+    firstCategoryName: firstname, // 使用 firstname 作为 value（如果需要）
+  }));
+  categorys_secondname.value = Object.keys(second).map((secondname) => ({
+    firstCategoryName: second[secondname].firstCategoryName,
+    secondCategoryName: secondname, // 使用 firstname 作为 value（如果需要）
+  }));
+  categorys_thirdname.value = Object.keys(third).map((thirdname) => ({
+    secondCategoryName: third[thirdname].secondCategoryName,
+    thirdCategoryName: thirdname, // 使用 firstname 作为 value（如果需要）
+  }));
 };
 const findCategoryID = () => {
-  for(let i = 0; i < categorys.value.length; i++){
+  for (let i = 0; i < categorys.value.length; i++) {
     let category = categorys.value[i];
-    if(category_first.value == category.firstCategoryName && 
-    category_second.value == category.secondCategoryName && 
-    category_third.value == category.thirdCategoryName){
+    if (
+      category_first.value == category.firstCategoryName &&
+      category_second.value == category.secondCategoryName &&
+      category_third.value == category.thirdCategoryName
+    ) {
       categoryId.value = category.id;
       break;
     }
   }
 };
 const findCategoryIDAdd = () => {
-  for(let i = 0; i < categorys.value.length; i++){
+  for (let i = 0; i < categorys.value.length; i++) {
     let category = categorys.value[i];
-    if(category_first_add.value == category.firstCategoryName && 
-    category_second_add.value == category.secondCategoryName && 
-    category_third_add.value == category.thirdCategoryName){
+    if (
+      category_first_add.value == category.firstCategoryName &&
+      category_second_add.value == category.secondCategoryName &&
+      category_third_add.value == category.thirdCategoryName
+    ) {
       categoryId.value = category.id;
       break;
     }
@@ -111,6 +120,9 @@ const articleList = async () => {
     pageSize: pageSize.value,
     categoryId: categoryId.value ? categoryId.value : null,
     state: state.value ? state.value : null,
+    date: date.value ? date.value : null,
+    titleKeyword: titleKeyword.value ? titleKeyword.value : null,
+    contentKeyword: contentKeyword.value ? contentKeyword.value : null,
   };
   let result = await articleListService(params);
   //渲染视图
@@ -134,8 +146,27 @@ articleList();
 
 import { QuillEditor } from "@vueup/vue-quill";
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
+import "@wangeditor/editor/dist/css/style.css"; // 引入 css
+
+import { onBeforeUnmount, shallowRef, onMounted } from "vue";
+import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
+const editorRef = shallowRef();
+const toolbarConfig = {};
+const editorConfig = { placeholder: "请输入内容..." };
+
+// 组件销毁时，也及时销毁编辑器
+onBeforeUnmount(() => {
+  const editor = editorRef.value;
+  if (editor == null) return;
+  editor.destroy();
+});
+
+const handleCreated = (editor) => {
+  editorRef.value = editor; // 记录 editor 实例，重要！
+};
+
 import { Plus } from "@element-plus/icons-vue";
-import { ElMessage,ElMessageBox } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 //控制抽屉是否显示
 const visibleDrawer = ref(false);
 //添加表单数据模型
@@ -146,34 +177,30 @@ const articleModel = ref({
   state: "",
 });
 //添加文章
-const addArticle = async(clickState)=>{
-    //把发布状态赋值给数据模型
-    articleModel.value.state = clickState;
-    articleModel.value.categoryId =categoryId.value;
-    //调用接口
-    let result = await articleAddService(articleModel.value);
-    ElMessage.success(result.msg?result.msg:'添加成功');
-    //抽屉消失
-    visibleDrawer.value = false;
-    clearCategoryAdd();    
-    //刷新当前列表
-    articleList()
-}
+const addArticle = async (clickState) => {
+  //把发布状态赋值给数据模型
+  articleModel.value.state = clickState;
+  articleModel.value.categoryId = categoryId.value;
+  //调用接口
+  let result = await articleAddService(articleModel.value);
+  ElMessage.success(result.msg ? result.msg : "添加成功");
+  //抽屉消失
+  visibleDrawer.value = false;
+  clearCategoryAdd();
+  //刷新当前列表
+  articleList();
+};
 //删除文章
-const deleteArticle = async(row)=>{
-   //提示用户  确认框
-   ElMessageBox.confirm(
-    "确认删除该分类吗",
-    "温馨提示",
-    {
-      confirmButtonText: "确认",
-      cancelButtonText: "取消",
-      type: "warning",
-    }
-  )
+const deleteArticle = async (row) => {
+  //提示用户  确认框
+  ElMessageBox.confirm("确认删除该分类吗", "温馨提示", {
+    confirmButtonText: "确认",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
     .then(async () => {
-        //调用接口
-        let result = await articleDeleteService(row.id);
+      //调用接口
+      let result = await articleDeleteService(row.id);
       ElMessage({
         type: "success",
         message: "删除成功",
@@ -187,19 +214,19 @@ const deleteArticle = async(row)=>{
         message: "用户取消删除",
       });
     });
-}
+};
 //定义变量控制标题展示
 const title = ref("");
 //编辑文章
-const showArticle = (row)=>{
-  visibleDrawer.value=true;
-  title.value='编辑文章';
+const showArticle = (row) => {
+  visibleDrawer.value = true;
+  title.value = "编辑文章";
   articleModel.value.id = row.id;
   articleModel.value.categoryId = row.categoryId;
   articleModel.value.title = row.title;
-  for(let i=0; i < categorys.value.length; i++){
+  for (let i = 0; i < categorys.value.length; i++) {
     let category = categorys.value[i];
-    if(category.id == articleModel.value.categoryId){
+    if (category.id == articleModel.value.categoryId) {
       category_first_add.value = category.firstCategoryName;
       category_second_add.value = category.secondCategoryName;
       category_third_add.value = category.thirdCategoryName;
@@ -207,35 +234,39 @@ const showArticle = (row)=>{
   }
   articleModel.value.content = row.content;
   articleModel.value.state = row.state;
-}
-const updateArticle = async(clickState)=>{
+};
+const updateArticle = async (clickState) => {
   articleModel.value.state = clickState;
-  articleModel.value.categoryId =categoryId.value;
+  articleModel.value.categoryId = categoryId.value;
   let result = await articleUpdateService(articleModel.value);
-  ElMessage.success(result.msg?result.msg:'添加成功');
+  ElMessage.success(result.msg ? result.msg : "添加成功");
   visibleDrawer.value = false;
   clearCategoryAdd();
   //刷新当前列表
-  articleList()
-}
-const clearData = ()=>{
-  articleModel.value.categoryId = '';
-  articleModel.value.title = '';
-  articleModel.value.state = '';
-  articleModel.value.content = '';
-}
-const clearCategory = ()=>{
-  category_first.value = '';
-  category_second.value = '';
-  category_third.value = '';
-  categoryId.value = '';
-}
-const clearCategoryAdd = ()=>{
-  category_first_add.value = '';
-  category_second_add.value ='';
-  category_third_add.value ='';
-  categoryId.value = '';
-}
+  articleList();
+};
+const clearData = () => {
+  articleModel.value.categoryId = "";
+  articleModel.value.title = "";
+  articleModel.value.state = "";
+  articleModel.value.content = "";
+  const editor = editorRef.value
+  if(editor != null){
+    editor.clear();
+  }
+};
+const clearCategory = () => {
+  category_first.value = "";
+  category_second.value = "";
+  category_third.value = "";
+  categoryId.value = "";
+};
+const clearCategoryAdd = () => {
+  category_first_add.value = "";
+  category_second_add.value = "";
+  category_third_add.value = "";
+  categoryId.value = "";
+};
 </script>
 <template>
   <el-card class="page-container">
@@ -243,7 +274,16 @@ const clearCategoryAdd = ()=>{
       <div class="header">
         <span>文章管理</span>
         <div class="extra">
-          <el-button type="primary" @click="visibleDrawer = true; title = '添加文章';clearData()">添加文章</el-button>
+          <el-button
+            type="primary"
+            @click="
+              visibleDrawer = true;
+              title = '添加文章';
+              clearData();
+              clearCategoryAdd();
+            "
+            >添加文章</el-button
+          >
         </div>
       </div>
     </template>
@@ -254,7 +294,10 @@ const clearCategoryAdd = ()=>{
           placeholder="请选择"
           v-model="category_first"
           style="width: 100px"
-          @change="category_second='';category_third=''"
+          @change="
+            category_second = '';
+            category_third = '';
+          "
         >
           <el-option
             v-for="c in categorys_firstname"
@@ -270,8 +313,8 @@ const clearCategoryAdd = ()=>{
           placeholder="请选择"
           v-model="category_second"
           style="width: 100px"
-          :disabled = "category_first.length === 0"
-          @change="category_third=''"
+          :disabled="category_first.length === 0"
+          @change="category_third = ''"
         >
           <el-option
             v-for="c in categorys_secondname"
@@ -288,7 +331,7 @@ const clearCategoryAdd = ()=>{
           placeholder="请选择"
           v-model="category_third"
           style="width: 100px"
-          :disabled = "category_second.length === 0 || category_second === ''"
+          :disabled="category_second.length === 0 || category_second === ''"
         >
           <el-option
             v-for="c in categorys_thirdname"
@@ -306,15 +349,48 @@ const clearCategoryAdd = ()=>{
           <el-option label="草稿" value="草稿"></el-option>
         </el-select>
       </el-form-item>
+      <el-form-item label="日期：">
+        <el-date-picker
+          v-model="date"
+          type="date"
+          placeholder="选择发布日期"
+          :size="size"
+          value-format="YYYY-MM-DD"
+        />
+      </el-form-item>
+      <el-form-item label="标题关键词：">
+        <el-input
+          v-model="titleKeyword"
+          placeholder="请输入"
+          clearable
+        />
+      </el-form-item>
+      <el-form-item label="内容关键词：">
+        <el-input
+          v-model="contentKeyword"
+          placeholder="请输入"
+          clearable
+        />
+      </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="findCategoryID();articleList()">搜索</el-button>
+        <el-button
+          type="primary"
+          @click="
+            findCategoryID();
+            articleList();
+          "
+          >搜索</el-button
+        >
         <el-button
           @click="
             categoryId = '';
             state = '';
             category_first = '';
-            category_second= '';
+            category_second = '';
             category_third = '';
+            date = '';
+            titleKeyword = '';
+            contentKeyword = '';
             articleList();
           "
           >重置</el-button
@@ -322,21 +398,38 @@ const clearCategoryAdd = ()=>{
       </el-form-item>
     </el-form>
     <!-- 文章列表 -->
-    <el-table :data="articles" style="width: 100%">
+    <el-table :data="articles" style="width: 100%" :table-layout="auto">
+      <el-table-column label="文章标题" prop="title"></el-table-column>
       <el-table-column
-        label="文章标题"
-        width="400"
-        prop="title"
+        label="一级分类"
+        prop="firstCategoryName"
       ></el-table-column>
-      <el-table-column label="一级分类" prop="firstCategoryName"></el-table-column>
-      <el-table-column label="二级分类" prop="secondCategoryName"></el-table-column>
-      <el-table-column label="三级分类" prop="thirdCategoryName"></el-table-column>
+      <el-table-column
+        label="二级分类"
+        prop="secondCategoryName"
+      ></el-table-column>
+      <el-table-column
+        label="三级分类"
+        prop="thirdCategoryName"
+      ></el-table-column>
       <el-table-column label="发表时间" prop="createTime"> </el-table-column>
       <el-table-column label="状态" prop="state"></el-table-column>
-      <el-table-column label="操作" width="100">
+      <el-table-column label="操作">
         <template #default="{ row }">
-          <el-button :icon="Edit" circle plain type="primary" @click="showArticle(row)"></el-button>
-          <el-button :icon="Delete" circle plain type="danger" @click="deleteArticle(row)"></el-button>
+          <el-button
+            :icon="Edit"
+            circle
+            plain
+            type="primary"
+            @click="showArticle(row)"
+          ></el-button>
+          <el-button
+            :icon="Delete"
+            circle
+            plain
+            type="danger"
+            @click="deleteArticle(row)"
+          ></el-button>
         </template>
       </el-table-column>
       <template #empty>
@@ -356,7 +449,12 @@ const clearCategoryAdd = ()=>{
       style="margin-top: 20px; justify-content: flex-end"
     />
     <!-- 抽屉 -->
-    <el-drawer v-model="visibleDrawer" :title="title" direction="rtl" size="50%">
+    <el-drawer
+      v-model="visibleDrawer"
+      :title="title"
+      direction="rtl"
+      size="50%"
+    >
       <!-- 添加文章表单 -->
       <el-form :model="articleModel" label-width="100px">
         <el-form-item label="文章标题">
@@ -366,64 +464,101 @@ const clearCategoryAdd = ()=>{
           ></el-input>
         </el-form-item>
         <el-form-item label="一级分类：">
-        <el-select
-          placeholder="请选择"
-          v-model="category_first_add"
-          style="width: 100px"
-          @change="category_second_add='';categoryId=''"
-        >
-          <el-option
-            v-for="c in categorys_firstname"
-            :key="c.id"
-            :label="c.firstCategoryName"
-            :value="c.firstCategoryName"
+          <el-select
+            placeholder="请选择"
+            v-model="category_first_add"
+            style="width: 100px"
+            @change="
+              category_second_add = '';
+              categoryId = '';
+            "
           >
-          </el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="二级分类：">
-        <el-select
-          placeholder="请选择"
-          v-model="category_second_add"
-          style="width: 100px"
-          :disabled = "category_first_add.length === 0"
-          @change="category_third_add=''"
-        >
-          <el-option
-            v-for="c in categorys_secondname"
-            :key="c.id"
-            :label="c.secondCategoryName"
-            :value="c.secondCategoryName"
-            v-show="c.firstCategoryName == category_first_add"
+            <el-option
+              v-for="c in categorys_firstname"
+              :key="c.id"
+              :label="c.firstCategoryName"
+              :value="c.firstCategoryName"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="二级分类：">
+          <el-select
+            placeholder="请选择"
+            v-model="category_second_add"
+            style="width: 100px"
+            :disabled="category_first_add.length === 0"
+            @change="category_third_add = ''"
           >
-          </el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="三级分类：">
-        <el-select
-          placeholder="请选择"
-          v-model="category_third_add"
-          style="width: 100px"
-          :disabled = "category_second_add.length === 0 || category_second_add === ''"
-        >
-          <el-option
-            v-for="c in categorys_thirdname"
-            :key="c.id"
-            :label="c.thirdCategoryName"
-            :value="c.thirdCategoryName"
-            v-show="c.secondCategoryName === category_second_add"
+            <el-option
+              v-for="c in categorys_secondname"
+              :key="c.id"
+              :label="c.secondCategoryName"
+              :value="c.secondCategoryName"
+              v-show="c.firstCategoryName == category_first_add"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="三级分类：">
+          <el-select
+            placeholder="请选择"
+            v-model="category_third_add"
+            style="width: 100px"
+            :disabled="
+              category_second_add.length === 0 || category_second_add === ''
+            "
           >
-          </el-option>
-        </el-select>
-      </el-form-item>
+            <el-option
+              v-for="c in categorys_thirdname"
+              :key="c.id"
+              :label="c.thirdCategoryName"
+              :value="c.thirdCategoryName"
+              v-show="c.secondCategoryName === category_second_add"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="文章内容">
-          <div class="editor">
+          <!--<div class="editor">
             <quill-editor theme="snow" v-model:content="articleModel.content" contentType="html"></quill-editor>
+          </div>
+          -->
+          <div style="border: 1px solid #ccc">
+            <Toolbar
+              style="border-bottom: 1px solid #ccc"
+              :editor="editorRef"
+              :defaultConfig="toolbarConfig"
+              :mode="mode"
+            />
+            <Editor
+              style="height: 500px; overflow-y: hidden"
+              v-model="articleModel.content"
+              :defaultConfig="editorConfig"
+              :mode="mode"
+              @onCreated="handleCreated"
+            />
           </div>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="findCategoryIDAdd();title == '添加文章'? addArticle('已发布'):updateArticle('已发布');">发布</el-button>
-          <el-button type="info" @click="findCategoryIDAdd();title == '添加文章'? addArticle('草稿'):updateArticle('草稿')">草稿</el-button>
+          <el-button
+            type="primary"
+            @click="
+              findCategoryIDAdd();
+              title == '添加文章'
+                ? addArticle('已发布')
+                : updateArticle('已发布');
+            "
+            >发布</el-button
+          >
+          <el-button
+            type="info"
+            @click="
+              findCategoryIDAdd();
+              title == '添加文章' ? addArticle('草稿') : updateArticle('草稿');
+            "
+            >草稿</el-button
+          >
         </el-form-item>
       </el-form>
     </el-drawer>
