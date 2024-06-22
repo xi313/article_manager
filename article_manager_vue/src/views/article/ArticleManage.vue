@@ -440,7 +440,7 @@ const clearCategoryAdd = () => {
     <el-pagination
       v-model:current-page="pageNum"
       v-model:page-size="pageSize"
-      :page-sizes="[3, 5, 10, 15]"
+      :page-sizes="[1, 3, 10, 25]"
       layout="jumper, total, sizes, prev, pager, next"
       background
       :total="total"
@@ -453,7 +453,7 @@ const clearCategoryAdd = () => {
       v-model="visibleDrawer"
       :title="title"
       direction="rtl"
-      size="50%"
+      size="70%"
     >
       <!-- 添加文章表单 -->
       <el-form :model="articleModel" label-width="100px">

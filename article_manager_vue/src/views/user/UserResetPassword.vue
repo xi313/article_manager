@@ -60,7 +60,7 @@ const updateUserPassword = async ()=>{
                 //用户点击了取消
                 ElMessage({
                     type: 'info',
-                    message: '取消退出',
+                    message: '用户退出',
                 })
             })
 }

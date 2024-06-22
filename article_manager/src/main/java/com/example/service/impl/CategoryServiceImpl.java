@@ -20,6 +20,11 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void add(Category category) {
+        Map<String,Object> map = ThreadLocalUtil.get();
+        Integer id = (Integer) map.get("id");
+        category.setCreateUser(id);
+        category.setCreateTime(LocalDateTime.now());
+        category.setUpdateTime(LocalDateTime.now());
         categoryMapper.add(category);
     }
 

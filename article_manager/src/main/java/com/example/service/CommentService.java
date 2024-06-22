@@ -9,10 +9,10 @@ public interface CommentService {
     void add(Comment comment);
 
     //查看评论列表
-    PageBean<Article> list(Integer pageNum, Integer pageSize, Integer articleId);
+    PageBean<Comment> list(Integer pageNum, Integer pageSize, Integer articleId);
 
     //查看自己文章列表
-    PageBean<Article> listById(Integer pageNum, Integer pageSize, Integer articleId);
+    PageBean<Comment> listByUserId(Integer pageNum, Integer pageSize, Integer articleId);
 
     //根据Id查找评论
     Comment findById(Integer id);

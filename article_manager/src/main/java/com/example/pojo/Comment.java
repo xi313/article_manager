@@ -11,9 +11,9 @@ import java.time.LocalDateTime;
 public class Comment {
     private Integer id;//主键ID
     @NotEmpty
-    private String content;//文章内容
+    private String content;//内容
     @NotNull(groups = Comment.Add.class)
-    private Integer articleId;//文章分类id
+    private Integer articleId;//文章id
     private Integer createUser;//创建人ID
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;//创建时间

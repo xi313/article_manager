@@ -47,9 +47,6 @@ public class CategoryController {
                 category.setThirdCategoryName("");
             }
         }
-        category.setCreateUser(id);
-        category.setCreateTime(LocalDateTime.now());
-        category.setUpdateTime(LocalDateTime.now());
         categoryService.add(category);
         return Result.success();
     }

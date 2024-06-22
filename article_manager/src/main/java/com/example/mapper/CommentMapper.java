@@ -15,7 +15,7 @@ public interface CommentMapper {
     void add(Comment comment);
 
     //分页查询
-    List<Article> list(Integer articleId,Integer userId);
+    List<Comment> list(Integer articleId,Integer userId);
 
     //根据Id查询评论
     @Select("select * from comment where id=#{id}")

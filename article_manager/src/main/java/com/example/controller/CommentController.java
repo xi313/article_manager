@@ -20,22 +20,22 @@ public class CommentController {
     }
 
     @GetMapping
-    public Result<PageBean<Article>> list(
+    public Result<PageBean<Comment>> list(
             Integer pageNum,
             Integer pageSize,
             Integer articleId
     ){
-        PageBean<Article> pb = commentService.list(pageNum,pageSize,articleId);
+        PageBean<Comment> pb = commentService.list(pageNum,pageSize,articleId);
         return Result.success(pb);
     }
 
     @GetMapping("/self")
-    public Result<PageBean<Article>> listById(
+    public Result<PageBean<Comment>> listById(
             Integer pageNum,
             Integer pageSize,
             Integer articleId
     ){
-        PageBean<Article> pb = commentService.listById(pageNum,pageSize,articleId);
+        PageBean<Comment> pb = commentService.listByUserId(pageNum,pageSize,articleId);
         return Result.success(pb);
     }
 

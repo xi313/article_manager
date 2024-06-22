@@ -32,31 +32,31 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public PageBean<Article> list(Integer pageNum, Integer pageSize, Integer articleId) {
+    public PageBean<Comment> list(Integer pageNum, Integer pageSize, Integer articleId) {
         //创建PageBean、
-        PageBean<Article> pb = new PageBean<>();
+        PageBean<Comment> pb = new PageBean<>();
         //开启分页查询PageHelper
         PageHelper.startPage(pageNum,pageSize);
-        List<Article> as = commentMapper.list(articleId,null);
+        List<Comment> as = commentMapper.list(articleId,null);
         //Page可以获取PageHelper分页查询后得到的总记录条数和当前数据
-        Page<Article> p = (Page<Article>) as;
+        Page<Comment> p = (Page<Comment>) as;
         pb.setTotal(p.getTotal());
         pb.setItems(p.getResult());
         return pb;
     }
 
     @Override
-    public PageBean<Article> listById(Integer pageNum, Integer pageSize, Integer articleId) {
+    public PageBean<Comment> listByUserId(Integer pageNum, Integer pageSize, Integer articleId) {
         //创建PageBean、
-        PageBean<Article> pb = new PageBean<>();
+        PageBean<Comment> pb = new PageBean<>();
         //开启分页查询PageHelper
         PageHelper.startPage(pageNum,pageSize);
         //调用mapper
         Map<String,Object> map = ThreadLocalUtil.get();
         Integer userId = (Integer) map.get("id");
-        List<Article> as = commentMapper.list(articleId,userId);
+        List<Comment> as = commentMapper.list(articleId,userId);
         //Page可以获取PageHelper分页查询后得到的总记录条数和当前数据
-        Page<Article> p = (Page<Article>) as;
+        Page<Comment> p = (Page<Comment>) as;
         pb.setTotal(p.getTotal());
         pb.setItems(p.getResult());
         return pb;
