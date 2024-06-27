@@ -1,8 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.example.service.impl.UserServiceImplTest
--------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.006 s <<< FAILURE! - in com.example.service.impl.UserServiceImplTest
-com.example.service.impl.UserServiceImplTest  Time elapsed: 0.006 s  <<< ERROR!
-com.auth0.jwt.exceptions.TokenExpiredException: The Token has expired on 2024-06-23T02:58:17Z.
-	at com.example.service.impl.UserServiceImplTest.init(UserServiceImplTest.java:28)
-

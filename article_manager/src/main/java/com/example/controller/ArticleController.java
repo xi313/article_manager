@@ -27,19 +27,40 @@ public class ArticleController {
     }
 
 
-    @GetMapping
+    @PostMapping("/list")
     public Result<PageBean<Article>> list(
-            Integer pageNum,
-            Integer pageSize,
-            @RequestParam(required = false) Integer categoryId,
-            @RequestParam(required = false) String state,
-            @RequestParam(required = false) String date,
-            @RequestParam(required = false) String titleKeyword,
-            @RequestParam(required = false) String contentKeyword
+//            Integer pageNum,
+//            Integer pageSize,
+//            @RequestParam(required = false) Integer categoryId,
+//            @RequestParam(required = false) String state,
+//            @RequestParam(required = false) String date,
+//            @RequestParam(required = false) String titleKeyword,
+//            @RequestParam(required = false) String contentKeyword
+            @RequestBody Map<String,Object> params
     ){
-        Integer[] category_id = null;
-        if(categoryId != null) category_id = new Integer[]{categoryId};
-        PageBean<Article> pb = articleService.list(pageNum,pageSize,category_id,state,date,titleKeyword,contentKeyword);
+//        Integer[] category_id = null;
+//        if(categoryId != null) category_id = new Integer[]{categoryId};
+        Integer pageNum = (Integer)params.get("pageNum");
+        Integer pageSize = (Integer)params.get("pageSize");
+        Object s = params.get("categoryId");
+        String state = (String) params.get("state");
+        String date =params.get("date") != null ? (String) params.get("date") : null;
+        String titleKeyword =params.get("titleKeyword") != null? (String) params.get("titleKeyword") : null;
+        String contentKeyword =params.get("contentKeyword") != null? (String) params.get("contentKeyword") : null;
+        Integer[] categoryId = null;
+        if(s != null){
+            ArrayList<Integer> arrayList = new ArrayList<>();
+            String category_str = s.toString();
+            category_str = category_str.substring(1,category_str.length()-1);
+            String[] category_list = category_str.split(",");
+            for (String id :
+                    category_list) {
+                id = id.trim();
+                arrayList.add(Integer.parseInt(id));
+            }
+            categoryId = arrayList.toArray(new Integer[0]);
+        }
+        PageBean<Article> pb = articleService.list(pageNum,pageSize,categoryId,state,date,titleKeyword,contentKeyword);
         return Result.success(pb);
     }
 

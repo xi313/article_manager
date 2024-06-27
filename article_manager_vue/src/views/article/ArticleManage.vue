@@ -9,7 +9,7 @@ const categorys_firstname = ref([]);
 const categorys_secondname = ref([]);
 const categorys_thirdname = ref([]);
 //用户搜索时选中的分类id
-const categoryId = ref("");
+const categoryId = ref([]);
 //日期
 const date = ref("");
 //用户搜索时的关键字
@@ -88,19 +88,32 @@ const articleCategoryList = async () => {
   }));
 };
 const findCategoryID = () => {
+  categoryId.value = [];
   for (let i = 0; i < categorys.value.length; i++) {
     let category = categorys.value[i];
-    if (
+   /* if (
       category_first.value == category.firstCategoryName &&
       category_second.value == category.secondCategoryName &&
       category_third.value == category.thirdCategoryName
     ) {
-      categoryId.value = category.id;
-      break;
+      categoryId.value.push(category.id);
+    }*/
+    if(category_first.value == category.firstCategoryName){
+      if(category_second.value == "" || category_second.value == null){
+        categoryId.value.push(category.id);
+      }else if(category_second.value == category.secondCategoryName){
+          if(category_third.value == "" || category_third.value == null){
+            categoryId.value.push(category.id);
+          }else if(category_third.value == category.thirdCategoryName){
+            categoryId.value.push(category.id);
+          }else{
+          }
+      }else{
+      }
     }
   }
   if(category_first.value != "" && categoryId.value.length == 0){
-    categoryId.value = -1;
+    categoryId.value.push(-1);
   }
 };
 const findCategoryIDAdd = () => {
@@ -121,7 +134,7 @@ const articleList = async () => {
   let params = {
     pageNum: pageNum.value,
     pageSize: pageSize.value,
-    categoryId: categoryId.value ? categoryId.value : null,
+    categoryId: categoryId.value.length != 0 ? categoryId.value : null,
     state: state.value ? state.value : null,
     date: date.value ? date.value : null,
     titleKeyword: titleKeyword.value ? titleKeyword.value : null,

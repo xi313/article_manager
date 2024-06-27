@@ -27,7 +27,7 @@ export const articleCategoryDeleteService = (id) => {
 }
 //文章列表查询
 export const articleListService = (params)=>{
-    return request.get('/article',{params:params})
+    return request.post('/article/list',params)
 }
 //文章添加
 export const articleAddService = (articleData)=>{
