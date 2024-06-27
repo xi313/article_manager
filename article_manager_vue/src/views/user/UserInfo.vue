@@ -3,6 +3,9 @@ import { ref } from 'vue'
 import { useUserInfoStore } from '@/stores/userInfo.js';
 const userInfoStore = useUserInfoStore()
 const userInfo = ref({...userInfoStore.info})
+const username = ref("");
+const nickname = ref("");
+const email = ref("");
 
 const rules = {
     nickname: [
@@ -19,10 +22,20 @@ const rules = {
     ]
 }
 
+
+const show = () => {
+    username.value = userInfo.value.username
+    nickname.value = userInfo.value.nickname
+    email.value = userInfo.value.email
+}
+show()
 //修改个人信息
 import {userInfoUpdateService} from '@/api/user.js'
 import { ElMessage } from 'element-plus';
 const updateUserInfo = async ()=>{
+    userInfo.value.username = username.value
+    userInfo.value.nickname = nickname.value
+    userInfo.value.email = email.value 
     let result = await userInfoUpdateService(userInfo.value)
     ElMessage.success(result.message? result.message:'修改成功')
     //更新pinia中的数据
@@ -42,13 +55,13 @@ const updateUserInfo = async ()=>{
             <el-col :span="12">
                 <el-form :model="userInfo" :rules="rules" label-width="100px" size="large">
                     <el-form-item label="登录名称">
-                        <el-input v-model="userInfo.username" disabled></el-input>
+                        <el-input v-model="username" disabled></el-input>
                     </el-form-item>
                     <el-form-item label="用户昵称" prop="nickname">
-                        <el-input v-model="userInfo.nickname"></el-input>
+                        <el-input v-model="nickname"></el-input>
                     </el-form-item>
                     <el-form-item label="用户邮箱" prop="email">
-                        <el-input v-model="userInfo.email"></el-input>
+                        <el-input v-model="email"></el-input>
                     </el-form-item>
                     <el-form-item>
                         <el-button type="primary" @click="updateUserInfo">提交修改</el-button>

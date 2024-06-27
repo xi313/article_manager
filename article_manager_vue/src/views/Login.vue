@@ -40,6 +40,8 @@ import {userRegisterService,userLoginService} from '@/api/user.js'
 const register = async()=>{
     let result = await userRegisterService(registerData.value);
     ElMessage.success(result.msg?result.msg:'注册成功');
+    isRegister.value = false;
+    clearRegisterData();
     //alert(result.msg?result.msg:'注册成功');
 }
 //绑定数据,服用注册表单数据模型

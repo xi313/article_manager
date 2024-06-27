@@ -1,5 +1,4 @@
 com\example\controller\CategoryController.class
-com\example\controller\FileUploadController.class
 com\example\anno\State.class
 com\example\utils\Md5Util.class
 com\example\service\impl\UserServiceImpl.class

@@ -23,10 +23,10 @@
                 and to_days(update_time)=to_days(#{date})
             </if>
             <if test="titleKeyword!=null and titleKeyword!=''">
-                and title like "%"#{titleKeyword}"%"
+                and title like '%${titleKeyword}%'
             </if>
             <if test="contentKeyword!=null and contentKeyword!='' ">
-                and content like "%"#{contentKeyword}"%"
+                and content like '%${contentKeyword}%'
             </if>
         </where>
     </select>

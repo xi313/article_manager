@@ -104,13 +104,29 @@ const findCategoryID = () => {
   categoryId.value = [];
   for (let i = 0; i < categorys.value.length; i++) {
     let category = categorys.value[i];
-    if (
+   /* if (
       category_first.value == category.firstCategoryName &&
       category_second.value == category.secondCategoryName &&
       category_third.value == category.thirdCategoryName
     ) {
       categoryId.value.push(category.id);
+    }*/
+    if(category_first.value == category.firstCategoryName){
+      if(category_second.value == "" || category_second.value == null){
+        categoryId.value.push(category.id);
+      }else if(category_second.value == category.secondCategoryName){
+          if(category_third.value == "" || category_third.value == null){
+            categoryId.value.push(category.id);
+          }else if(category_third.value == category.thirdCategoryName){
+            categoryId.value.push(category.id);
+          }else{
+          }
+      }else{
+      }
     }
+  }
+  if(category_first.value != "" && categoryId.value.length == 0){
+    categoryId.value.push(-1);
   }
 };
 //获取文章列表数据

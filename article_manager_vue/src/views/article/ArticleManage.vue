@@ -99,6 +99,9 @@ const findCategoryID = () => {
       break;
     }
   }
+  if(category_first.value != "" && categoryId.value.length == 0){
+    categoryId.value = -1;
+  }
 };
 const findCategoryIDAdd = () => {
   for (let i = 0; i < categorys.value.length; i++) {
@@ -220,7 +223,7 @@ const title = ref("");
 //编辑文章
 const showArticle = (row) => {
   visibleDrawer.value = true;
-  title.value = "编辑文章";
+  title.value = "修改文章";
   articleModel.value.id = row.id;
   articleModel.value.categoryId = row.categoryId;
   articleModel.value.title = row.title;
@@ -239,7 +242,7 @@ const updateArticle = async (clickState) => {
   articleModel.value.state = clickState;
   articleModel.value.categoryId = categoryId.value;
   let result = await articleUpdateService(articleModel.value);
-  ElMessage.success(result.msg ? result.msg : "添加成功");
+  ElMessage.success(result.msg ? result.msg : "修改成功");
   visibleDrawer.value = false;
   clearCategoryAdd();
   //刷新当前列表
