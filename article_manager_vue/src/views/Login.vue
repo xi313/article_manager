@@ -38,10 +38,15 @@ const rules = {
 //调用后台接口完成注册
 import {userRegisterService,userLoginService} from '@/api/user.js'
 const register = async()=>{
-    let result = await userRegisterService(registerData.value);
-    ElMessage.success(result.msg?result.msg:'注册成功');
-    isRegister.value = false;
-    clearRegisterData();
+    if(registerData.value.password == registerData.value.rePassword){
+        let result = await userRegisterService(registerData.value);
+        ElMessage.success(result.msg?result.msg:'注册成功');
+        isRegister.value = false;
+        clearRegisterData();
+    }else{
+        ElMessage.error("两次输入密码不同");
+    }
+    
     //alert(result.msg?result.msg:'注册成功');
 }
 //绑定数据,服用注册表单数据模型
